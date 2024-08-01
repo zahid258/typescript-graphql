@@ -22,6 +22,6 @@ export default class PageEntity {
 
 
   @Field(() => PortfolioEntity)
-  @ManyToOne(() => PortfolioEntity, { nullable: false })
+  @ManyToOne(() => PortfolioEntity, (portfolio) => portfolio.pages, { nullable: false })
   portfolio: PortfolioEntity;
 }
