@@ -2,6 +2,7 @@ import { Field, ObjectType } from 'type-graphql';
 import { Column, Entity, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
 
 import PageEntity from './PageEntity';
+import PortfolioVersionEntity from './PortfolioVersionEntity';
 
 @ObjectType('Portfolio')
 @Entity()
@@ -20,4 +21,7 @@ export default class PortfolioEntity {
 
   @OneToMany(() => PageEntity, (page) => page.portfolio)
   pages: PageEntity[];
+
+  @OneToMany(() => PortfolioVersionEntity, (type) => type)
+  portfolioVersions: PortfolioVersionEntity[];
 }
