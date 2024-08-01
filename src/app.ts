@@ -17,6 +17,6 @@ const apolloServer = createApolloServer();
   apolloServer.applyMiddleware({ app, path: config.graphQLPath });
   app.listen(PORT, () => {
     // eslint-disable-next-line no-console
-    console.log(`Listening on port ${PORT}`);
+    console.log(`Server is running at http://localhost:${PORT}${apolloServer.graphqlPath}`)
   });
 })();
