@@ -11,7 +11,7 @@ export default class PortfolioVersionEntity {
   id: number;
 
   @Field(() => PageEntity)
-  @ManyToOne(() => PageEntity, (page) => page.portfolio)
+  @ManyToOne(() => PageEntity, (page) => page)
   page: PageEntity;
 
   @Field(() => PortfolioTypeEntity)

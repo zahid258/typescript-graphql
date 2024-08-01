@@ -1,4 +1,4 @@
-import { Arg, Mutation, Resolver } from 'type-graphql';
+import { Arg, Mutation, Query, Resolver } from 'type-graphql';
 import { getRepository } from 'typeorm';
 import PortfolioVersionEntity from '../entities/PortfolioVersionEntity';
 import PageEntity from '../entities/PageEntity';
@@ -48,5 +48,30 @@ export class PortfolioVersionResolver {
         await portfolioVersionRepository.save(snapshotVersion);
 
         return snapshotVersion;
+    }
+
+    // Query to get all portfolio versions
+    @Query(() => [PortfolioVersionEntity])
+    async getAllPortfolioVersions(): Promise<PortfolioVersionEntity[]> {
+        const portfolioVersionRepository = getRepository(PortfolioVersionEntity);
+        const results = await portfolioVersionRepository.find({
+            relations: ['page', 'portfolioType', 'page.portfolio']
+        });
+        return results;
+    }
+
+    // Query to get all pages for a given portfolio version
+    @Query(() => [PageEntity])
+    async getPagesByPortfolioVersion(@Arg('versionId') versionId: number): Promise<PageEntity[]> {
+        const portfolioVersionRepository = getRepository(PortfolioVersionEntity);
+        const portfolioVersion = await portfolioVersionRepository.findOne(versionId, {
+            relations: ['page']
+        });
+
+        if (!portfolioVersion) {
+            throw new Error('Portfolio version not found');
+        }
+
+        return [portfolioVersion.page];
     }
 }
