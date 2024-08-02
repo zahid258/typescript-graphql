@@ -1,5 +1,5 @@
 import { Arg, Mutation, Query, Resolver } from 'type-graphql';
-import { getRepository } from 'typeorm';
+import { getRepository, In } from 'typeorm';
 import PortfolioVersionEntity from '../entities/PortfolioVersionEntity';
 import PageEntity from '../entities/PageEntity';
 import PortfolioTypeEntity from '../entities/PortfolioTypeEntity';
@@ -60,18 +60,52 @@ export class PortfolioVersionResolver {
         return results;
     }
 
-    // Query to get all pages for a given portfolio version
+    //get all pages inside the version id
     @Query(() => [PageEntity])
     async getPagesByPortfolioVersion(@Arg('versionId') versionId: number): Promise<PageEntity[]> {
+        const portfolioTypeRepository = getRepository(PortfolioTypeEntity);
+
+        // Find the portfolio type with the given versionId
+        const parentPortfolioType = await portfolioTypeRepository.findOne({
+            where: { id: versionId }
+        });
+
+        if (!parentPortfolioType) {
+            throw new Error('Portfolio type not found');
+        }
+
+        let portfolioTypes: PortfolioTypeEntity[];
+        // Extract portfolioType IDs
+        let portfolioTypeIds: number[] = [];
+
+        if (parentPortfolioType.parentId === 0) {
+            portfolioTypes = await portfolioTypeRepository.find({
+                where: [
+                    { parentId: versionId }
+                ]
+            });
+            portfolioTypeIds = portfolioTypes.map(pt => pt.id);
+            portfolioTypeIds.push(versionId);
+        } else {
+            portfolioTypeIds.push(versionId);
+        }
+
         const portfolioVersionRepository = getRepository(PortfolioVersionEntity);
-        const portfolioVersion = await portfolioVersionRepository.findOne(versionId, {
+
+        // Find all portfolio versions that match the portfolioType IDs
+        const portfolioVersions = await portfolioVersionRepository.find({
+            where: { portfolioType: In(portfolioTypeIds) },
             relations: ['page']
         });
 
-        if (!portfolioVersion) {
-            throw new Error('Portfolio version not found');
+        if (portfolioVersions.length === 0) {
+            throw new Error('Portfolio versions not found');
         }
 
-        return [portfolioVersion.page];
+        // Extract and return all pages from the found portfolio versions
+        return portfolioVersions.map(pv => pv.page);
     }
+
+
+
 }
