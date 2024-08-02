@@ -51,12 +51,10 @@ export class PortfolioVersionResolver {
     }
 
     // Query to get all portfolio versions
-    @Query(() => [PortfolioVersionEntity])
-    async getAllPortfolioVersions(): Promise<PortfolioVersionEntity[]> {
-        const portfolioVersionRepository = getRepository(PortfolioVersionEntity);
-        const results = await portfolioVersionRepository.find({
-            relations: ['page', 'portfolioType', 'page.portfolio']
-        });
+    @Query(() => [PortfolioTypeEntity])
+    async getAllPortfolioVersions(): Promise<PortfolioTypeEntity[]> {
+        const portfolioTypeRepository = getRepository(PortfolioTypeEntity);
+        const results = await portfolioTypeRepository.find({});
         return results;
     }
 
